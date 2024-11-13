@@ -116,8 +116,10 @@ test_image_gen = image_gen.flow_from_directory(test_path,target_size=image_shape
 results = model.fit(train_image_gen,epochs=4,validation_data=test_image_gen)
 model.save('cell_model.h5')
 losses = pd.DataFrame(model.history.history)
-print("ABINAYA S")
+print("Abinaya S\n212222230002\n")
 losses[['loss','val_loss']].plot()
+
+model.metrics_names
 
 import random
 import tensorflow as tf
@@ -131,7 +133,7 @@ pred=bool(model.predict(img.reshape(1,130,130,3))<0.5 )
 plt.title("Model prediction: "+("Parasitized" if pred
     else "Un Infected")+"\nActual Value: "+str(dir_))
 plt.axis("off")
-print("ABINAYA S 212222230002")
+print("Abinaya S\n212222230002\n")
 plt.imshow(img)
 plt.show()
 
@@ -139,7 +141,7 @@ model.evaluate(test_image_gen)
 pred_probabilities = model.predict(test_image_gen)
 test_image_gen.classes
 predictions = pred_probabilities > 0.5
-print("ABINAYA S 212222230002")
+print("Abinaya S\n212222230002\n")
 print(classification_report(test_image_gen.classes,predictions))
 confusion_matrix(test_image_gen.classes,predictions)
 
