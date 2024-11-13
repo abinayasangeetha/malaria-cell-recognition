@@ -8,13 +8,8 @@ To develop a deep neural network for Malaria infected cell recognition and to an
 To develop a deep neural network to accurately identify malaria-infected cells in microscopic blood images. This automated system should achieve high performance in diagnosis, improve treatment decisions, and potentially be deployed in resource-limited settings.Your task would be to optimize the model, possibly by tuning hyperparameters, trying different architectures, or using techniques like transfer learning to improve classification accuracy.
 <br>
 
-
-
 ## Neural Network Model
-
-![image](https://github.com/user-attachments/assets/fc54f48a-d9d9-48cd-aac6-5716fc871951)
-
-
+![image](https://github.com/user-attachments/assets/4c76d0a2-2ba2-4c63-a41b-be08600c3a80)
 
 ## DESIGN STEPS
 
@@ -49,6 +44,7 @@ from tensorflow.keras import utils
 from tensorflow.keras import models
 from sklearn.metrics import classification_report,confusion_matrix
 import tensorflow as tf
+
 # to share the GPU resources for multiple sessions
 from tensorflow.compat.v1.keras.backend import set_session
 config = tf.compat.v1.ConfigProto()
@@ -80,6 +76,7 @@ for image_filename in os.listdir(test_path+'/uninfected'):
     d1,d2,colors = img.shape
     dim1.append(d1)
     dim2.append(d2)
+
 sns.jointplot(x=dim1,y=dim2)
 image_shape = (130,130,3)
 help(ImageDataGenerator)
@@ -96,48 +93,53 @@ image_gen.flow_from_directory(train_path)
 image_gen.flow_from_directory(test_path)
 
 model = models.Sequential()
-model.add(layers.Conv2D(filters=64, kernel_size=(3,3),input_shape=image_shape, activation='relu',))
+model.add(keras.Input(shape=(image_shape)))
+model.add(layers.Conv2D(filters=32,kernel_size=(3,3),activation='relu',))
 model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-model.add(layers.Conv2D(filters=32, kernel_size=(3,3), activation='relu',))
+model.add(layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu',))
+model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+model.add(layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu',))
 model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 model.add(layers.Flatten())
 model.add(layers.Dense(128))
-model.add(layers.Activation('relu'))
+model.add(layers.Dense(64,activation='relu'))
 model.add(layers.Dropout(0.5))
-model.add(layers.Dense(1))
-model.add(layers.Activation('sigmoid'))
+model.add(layers.Dense(1,activation='sigmoid'))
+model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
 
-model.compile(loss='binary_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
 model.summary()
 batch_size = 16
-help(image_gen.flow_from_directory)
-train_image_gen = image_gen.flow_from_directory(train_path,
-                                               target_size=image_shape[:2],
-                                                color_mode='rgb',
-                                               batch_size=batch_size,
-                                               class_mode='binary')
-train_image_gen.batch_size
-len(train_image_gen.classes)
-train_image_gen.total_batches_seen
-test_image_gen = image_gen.flow_from_directory(test_path,
-                                               target_size=image_shape[:2],
-                                               color_mode='rgb',
-                                               batch_size=batch_size,
-                                               class_mode='binary',shuffle=False)
-train_image_gen.class_indices
-results = model.fit(train_image_gen,epochs=2,
-                              validation_data=test_image_gen
-                             )
+train_image_gen = image_gen.flow_from_directory(train_path,target_size=image_shape[:2],
+                                                color_mode='rgb',batch_size=batch_size,class_mode='binary')
+test_image_gen = image_gen.flow_from_directory(test_path,target_size=image_shape[:2],
+                                               color_mode='rgb',batch_size=batch_size,class_mode='binary',shuffle=False)
+results = model.fit(train_image_gen,epochs=4,validation_data=test_image_gen)
 model.save('cell_model.h5')
 losses = pd.DataFrame(model.history.history)
+print("ABINAYA S")
 losses[['loss','val_loss']].plot()
-model.metrics_names
+
+import random
+import tensorflow as tf
+list_dir=["UnInfected","parasitized"]
+dir_=(list_dir[1])
+para_img= imread(train_path+ '/'+dir_+'/'+ os.listdir(train_path+'/'+dir_)[random.randint(0,100)])
+img  = tf.convert_to_tensor(np.asarray(para_img))
+img = tf.image.resize(img,(130,130))
+img=img.numpy()
+pred=bool(model.predict(img.reshape(1,130,130,3))<0.5 )
+plt.title("Model prediction: "+("Parasitized" if pred
+    else "Un Infected")+"\nActual Value: "+str(dir_))
+plt.axis("off")
+print("ABINAYA S 212222230002")
+plt.imshow(img)
+plt.show()
+
 model.evaluate(test_image_gen)
 pred_probabilities = model.predict(test_image_gen)
 test_image_gen.classes
 predictions = pred_probabilities > 0.5
+print("ABINAYA S 212222230002")
 print(classification_report(test_image_gen.classes,predictions))
 confusion_matrix(test_image_gen.classes,predictions)
 
