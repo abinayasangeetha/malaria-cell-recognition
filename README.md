@@ -139,10 +139,12 @@ plt.show()
 
 model.evaluate(test_image_gen)
 pred_probabilities = model.predict(test_image_gen)
+print("Abinaya S\n212222230002\n")
 test_image_gen.classes
 predictions = pred_probabilities > 0.5
 print("Abinaya S\n212222230002\n")
 print(classification_report(test_image_gen.classes,predictions))
+print("Abinaya S\n212222230002\n")
 confusion_matrix(test_image_gen.classes,predictions)
 
 ```
